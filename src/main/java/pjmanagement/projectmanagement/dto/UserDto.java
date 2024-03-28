@@ -4,13 +4,15 @@ package pjmanagement.projectmanagement.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
 
-
+    private int id;
     private String username;
     private String email;
     private String role;
@@ -18,6 +20,8 @@ public class UserDto {
 
 
 
+    @Setter
+    @Getter
     private int statusCode;
     private String error;
     private String message;
@@ -25,12 +29,4 @@ public class UserDto {
     private String refreshToken;
     private String expirationTime;
 
-    public void setMessage(String userRegisteredSuccessfully) {
-    }
-
-    public void setStatusCode(int i) {
-    }
-
-    public void setError(String message) {
-    }
 }

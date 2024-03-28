@@ -1,6 +1,8 @@
 package pjmanagement.projectmanagement.services;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pjmanagement.projectmanagement.dto.UserDto;
@@ -12,64 +14,75 @@ import java.util.HashMap;
 @Service
 public class AuthService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    private JWTUtils jwtUtils;
-    private PasswordEncoder passwordEncoder;
-    private AuthenticationManager authenticationManager;
+    private final JWTUtils jwtUtils;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthService(UserRepository userRepository, JWTUtils jwtUtils, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
         this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
     }
 
     public UserDto register(UserDto registrationRequest) {
-        UserDto newUser = new UserDto();
 
-        try {
-            UserEntity userEntity = new UserEntity();
-            userEntity.setEmail(registrationRequest.getEmail());
-            userEntity.setUsername(registrationRequest.getUsername());
-            userEntity.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
-            userEntity.setRole(registrationRequest.getRole());
-
-            userRepository.save(userEntity);
-
-            // Set properties for the new user DTO
-            newUser.setEmail(userEntity.getEmail());
-            newUser.setUsername(userEntity.getUsername());
-            newUser.setRole(userEntity.getRole());
-            newUser.setMessage("User registered successfully");
-        } catch (Exception e) {
-            newUser.setStatusCode(500);
-            newUser.setError(e.getMessage());
+        if (registrationRequest.getEmail() == null || registrationRequest.getPassword() == null) {
+            registrationRequest.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            registrationRequest.setMessage("Please provide an email and password");
+            return registrationRequest;
         }
 
-        return newUser;
+        // Check if the email already exists
+        var existingUserOptional = userRepository.findByEmail(registrationRequest.getEmail());
+        if (existingUserOptional.isPresent()) {
+            registrationRequest.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            registrationRequest.setMessage("Email already exists");
+            return registrationRequest;
+        }
+
+        // Create a new user
+        UserEntity userEntity = new UserEntity();
+        userEntity.setEmail(registrationRequest.getEmail());
+        userEntity.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
+        userRepository.save(userEntity);
+
+        // Set response for successful registration
+        registrationRequest.setStatusCode(HttpStatus.OK.value());
+        registrationRequest.setMessage("User registered successfully");
+
+        return registrationRequest;
     }
 
-    public UserDto login(UserDto loginRequest) {
 
+    public UserDto login(UserDto loginRequest) {
         var user = userRepository.findByEmail(loginRequest.getEmail()).orElse(null);
 
-        if(user != null){
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+        if (user != null && encoder.matches(loginRequest.getPassword(), user.getPassword())) {
             var jwt = jwtUtils.generateToken(user);
             var refreshToken = jwtUtils.generateRefreshToken(new HashMap<>(), user);
 
-            loginRequest.setStatusCode(200);
+            loginRequest.setStatusCode(HttpStatus.OK.value());
             loginRequest.setToken(jwt);
+            loginRequest.setId(user.getId());
             loginRequest.setRefreshToken(refreshToken);
             loginRequest.setExpirationTime("24Hr");
             loginRequest.setMessage("Successfully Signed In");
-        }else {
-            loginRequest.setStatusCode(500);
+        } else if (user == null) {
+            // User not found
+            loginRequest.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+            loginRequest.setMessage("Invalid email or password");
+        } else {
+            // Password incorrect
+            loginRequest.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+            loginRequest.setMessage("Invalid email or password");
         }
-
 
         return loginRequest;
     }
+
 
     public UserDto logout() {
         // Clear token and refresh token fields

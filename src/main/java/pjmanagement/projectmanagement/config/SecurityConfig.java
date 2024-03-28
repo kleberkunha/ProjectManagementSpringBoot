@@ -20,8 +20,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private  UserDetailsService userDetailsService;
-    private  JWTAuthFilter jwtAuthFIlter;
+    private final UserDetailsService userDetailsService;
+    private final JWTAuthFilter jwtAuthFIlter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .logout((logout) -> logout.logoutUrl("/logout"))
                 .authorizeHttpRequests(request -> request.requestMatchers("/auth/**", "/public/**").permitAll()
                         .requestMatchers("/users").permitAll()
+                        .requestMatchers("/users/{id}").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/register").permitAll()
                         .requestMatchers("/admin/**").hasAnyAuthority("ADMIN")

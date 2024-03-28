@@ -3,27 +3,32 @@ package pjmanagement.projectmanagement.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pjmanagement.projectmanagement.dto.ProjectDto;
+import pjmanagement.projectmanagement.dto.UserDto;
 import pjmanagement.projectmanagement.entities.ProjectEntity;
 import pjmanagement.projectmanagement.entities.UserEntity;
 import pjmanagement.projectmanagement.repository.ProjectRepository;
 import pjmanagement.projectmanagement.repository.UserRepository;
+import pjmanagement.projectmanagement.utils.UserMapper;
+
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 public class AdminUsers {
 
-    private ProjectRepository projectRepository;
-    private UserRepository userRepository;
+    private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
 
-    public AdminUsers(ProjectRepository projectRepository, UserRepository userRepository) {
+    private final UserMapper userMapper;
+
+    public AdminUsers(ProjectRepository projectRepository, UserRepository userRepository, UserMapper userMapper) {
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
 
@@ -41,16 +46,30 @@ public class AdminUsers {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<UserEntity>> getUsers() {
+    public ResponseEntity<List<UserDto>> getUsers() {
         List<UserEntity> users = userRepository.findAll();
+        List<UserDto> userDtos = users.stream()
+                .map(userMapper::toDto)
+                .collect(Collectors.toList());
 
-        if (users.isEmpty()) {
+        if (userDtos.isEmpty()) {
             return ResponseEntity.noContent().build(); // Return 204 No Content if no users found
         }
 
-        return ResponseEntity.ok(users); // Return the list of users
+        return ResponseEntity.ok(userDtos); // Return the list of users
     }
 
+    @GetMapping("/user/{id}")
+    public ResponseEntity<UserDto> getUser(@PathVariable Integer id) {
+        Optional<UserEntity> userFoundById = userRepository.findById(id);
+
+        if (userFoundById.isPresent()) {
+            UserDto userDto = userMapper.toDto(userFoundById.get());
+            return ResponseEntity.ok(userDto); // Return the user DTO if found
+        } else {
+            return ResponseEntity.notFound().build(); // Return 404 Not Found if user not found
+        }
+    }
 
     @GetMapping("/user/alone")
     public ResponseEntity<Object> userAlone(){
