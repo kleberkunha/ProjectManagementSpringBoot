@@ -2,7 +2,6 @@ package pjmanagement.projectmanagement.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Setter;
 
 @Data
 @Entity

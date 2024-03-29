@@ -7,21 +7,28 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Data
+@Setter
+@Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
 
-    private int id;
-    private String username;
+    private Integer id;
+    private String firstName;
+    private String lastName;
+    private String password;
     private String email;
     private String role;
-    private String password;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
 
 
-    @Setter
-    @Getter
+
+
     private int statusCode;
     private String error;
     private String message;

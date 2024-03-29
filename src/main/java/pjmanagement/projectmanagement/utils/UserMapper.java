@@ -7,10 +7,19 @@ import pjmanagement.projectmanagement.entities.UserEntity;
 @Component
 public class UserMapper {
 
-    public UserDto toDto(UserEntity userEntity) {
+    public static UserDto toDto(UserEntity userEntity) {
+        if (userEntity == null) {
+            return null;
+        }
+
         UserDto userDto = new UserDto();
+        userDto.setId(userEntity.getId());
         userDto.setEmail(userEntity.getEmail());
-        userDto.setUsername(userEntity.getUsername());
+        userDto.setFirstName(userEntity.getFirstName());
+        userDto.setLastName(userEntity.getLastName());
+        userDto.setRole(String.valueOf(userEntity.getRole()));
+        userDto.setCreatedAt(userEntity.getCreatedAt());
+        userDto.setUpdatedAt(userEntity.getUpdatedAt());
         return userDto;
     }
 }
