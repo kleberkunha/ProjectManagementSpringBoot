@@ -25,4 +25,5 @@ public class TestController {
     public String adminsEndPoint() {
         return "ONLY admins can see this";
     }
+
 }

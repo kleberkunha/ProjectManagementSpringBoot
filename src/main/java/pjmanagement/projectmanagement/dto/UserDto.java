@@ -26,10 +26,6 @@ public class UserDto {
     private LocalDateTime updatedAt;
 
 
-
-
-
-    private int statusCode;
     private String error;
     private String message;
     private String token;

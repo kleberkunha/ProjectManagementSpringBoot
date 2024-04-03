@@ -31,7 +31,7 @@ public class UserEntity implements UserDetails {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    RoleEntity role;
+    private RoleEntity role = RoleEntity.ROLE_USER;
 
     LocalDateTime createdAt;
     LocalDateTime updatedAt;

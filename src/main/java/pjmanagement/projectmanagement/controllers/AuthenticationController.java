@@ -1,13 +1,15 @@
 package pjmanagement.projectmanagement.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.web.bind.annotation.*;
 import pjmanagement.projectmanagement.dto.JwtAuthenticationResponse;
 import pjmanagement.projectmanagement.dto.UserDto;
+import pjmanagement.projectmanagement.entities.UserEntity;
+import pjmanagement.projectmanagement.repository.UserRepository;
 import pjmanagement.projectmanagement.services.AuthenticationService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/")
@@ -15,6 +17,7 @@ import pjmanagement.projectmanagement.services.AuthenticationService;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
+    private final UserRepository userRepository;
 
     @PostMapping("/register")
     public JwtAuthenticationResponse register(@RequestBody UserDto request) {
@@ -24,5 +27,11 @@ public class AuthenticationController {
     @PostMapping("/login")
     public JwtAuthenticationResponse login(@RequestBody UserDto request) {
         return authenticationService.login(request);
+    }
+
+    @GetMapping("/users")
+    public List<UserEntity> getAllUsers() {
+        // Retrieve all users from the database
+        return userRepository.findAll();
     }
 }
