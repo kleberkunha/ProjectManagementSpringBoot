@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import pjmanagement.projectmanagement.entities.UserEntity;
 import pjmanagement.projectmanagement.repository.UserRepository;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -46,8 +47,8 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public UserEntity updateUser(Long userId, UserEntity updatedUserData) {
-        Optional<UserEntity> optionalUser = userRepository.findById(userId);
+    public UserEntity updateUser(Long id, UserEntity updatedUserData) {
+        Optional<UserEntity> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
             UserEntity existingUser = optionalUser.get();
             existingUser.setFirstName(updatedUserData.getFirstName());
@@ -62,7 +63,7 @@ public class UserService {
             return userRepository.save(existingUser);
         } else {
             // Handle case where user with given ID is not found
-            throw new IllegalArgumentException(STR."User with ID \{userId} not found");
+            throw new IllegalArgumentException(STR."User with ID \{id} not found");
         }
     }
 

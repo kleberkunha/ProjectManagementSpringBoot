@@ -34,4 +34,11 @@ public class AuthenticationController {
         // Retrieve all users from the database
         return userRepository.findAll();
     }
+
+    @GetMapping(path = {"/profile/{id}"})
+    public UserEntity findOne(@PathVariable("id") int id){
+        return userRepository.findById(id);
+    }
+
+
 }
